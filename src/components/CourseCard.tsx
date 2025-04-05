@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Star, Clock, Users, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -16,7 +15,7 @@ export interface CourseType {
   level: string;
   studentsEnrolled: number;
   category: string;
-  description: string; // Added the missing description property
+  description: string;
 }
 
 interface CourseCardProps {
@@ -25,13 +24,23 @@ interface CourseCardProps {
 }
 
 const CourseCard: React.FC<CourseCardProps> = ({ course, onAddToCart }) => {
+  const [imageError, setImageError] = useState(false);
+
+  const handleImageError = () => {
+    console.error(`Failed to load image: ${course.imageUrl}`);
+    setImageError(true);
+  };
+
+  const fallbackImage = "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80";
+
   return (
     <div className="course-card flex flex-col h-full">
       <div className="relative overflow-hidden" style={{ aspectRatio: "16/9" }}>
         <img 
-          src={course.imageUrl} 
+          src={imageError ? fallbackImage : course.imageUrl} 
           alt={course.title} 
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+          onError={handleImageError}
         />
         <div className="absolute top-2 left-2 bg-white/80 backdrop-blur-sm rounded-full px-2 py-1 text-xs font-medium">
           {course.category}
