@@ -1,179 +1,232 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Search, Filter, ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import CourseCard, { CourseType } from '@/components/CourseCard';
 import Navbar from '@/components/Navbar';
-import CourseCard from '@/components/CourseCard';
 import { toast } from '@/components/ui/use-toast';
-import { CourseType } from '@/components/CourseCard';
 
-// Course data
-const coursesData: CourseType[] = [
+// Sample course data
+const sampleCourses: CourseType[] = [
   {
-    id: "1",
-    title: 'Introduction to React',
-    description: 'Learn the fundamentals of React, hooks, and modern state management',
-    price: 49.99,
-    rating: 4.8,
-    reviewCount: 342,
+    id: '1',
+    title: 'Introduction to Web Development',
     instructor: 'John Smith',
-    imageUrl: 'https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80',
-    category: 'Programming',
-    level: 'Beginner',
-    duration: '6 weeks',
-    studentsEnrolled: 15432
-  },
-  {
-    id: "2",
-    title: 'Advanced JavaScript Patterns',
-    description: 'Master advanced JavaScript concepts, design patterns and optimization techniques',
-    price: 79.99,
-    rating: 4.9,
-    reviewCount: 215,
-    instructor: 'Sarah Johnson',
-    imageUrl: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80',
-    category: 'Programming',
-    level: 'Advanced',
-    duration: '8 weeks',
-    studentsEnrolled: 8745
-  },
-  {
-    id: "3",
-    title: 'UI/UX Design Principles',
-    description: 'Comprehensive guide to designing intuitive and beautiful user interfaces',
-    price: 59.99,
-    rating: 4.7,
-    reviewCount: 189,
-    instructor: 'Michael Chen',
-    imageUrl: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80',
-    category: 'Design',
-    level: 'Intermediate',
-    duration: '5 weeks',
-    studentsEnrolled: 12340
-  },
-  {
-    id: "4",
-    title: 'Python for Data Science',
-    description: 'Learn how to analyze and visualize data using Python and popular libraries',
-    price: 69.99,
     rating: 4.8,
-    reviewCount: 276,
-    instructor: 'Emma Watson',
-    imageUrl: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80',
-    category: 'Data Science',
+    reviewCount: 2563,
+    price: 99.99,
+    discountPrice: 49.99,
+    imageUrl: 'https://images.unsplash.com/photo-1547658719-da2b51169166?q=80&w=2064&auto=format',
+    duration: '8 weeks',
+    level: 'Beginner',
+    studentsEnrolled: 15420,
+    category: 'Development'
+  },
+  {
+    id: '2',
+    title: 'Machine Learning A-Z: Hands-On Python & R In Data Science',
+    instructor: 'Sarah Johnson',
+    rating: 4.6,
+    reviewCount: 1832,
+    price: 129.99,
+    discountPrice: 64.99,
+    imageUrl: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=2065&auto=format',
+    duration: '12 weeks',
     level: 'Intermediate',
-    duration: '7 weeks',
-    studentsEnrolled: 18965
+    studentsEnrolled: 9870,
+    category: 'Data Science'
   },
   {
-    id: "5",
-    title: 'Full Stack Web Development',
-    description: 'Comprehensive course covering frontend, backend, and deployment',
-    price: 89.99,
+    id: '3',
+    title: 'UX/UI Design: Creating User-Centered Experiences',
+    instructor: 'Michael Brown',
     rating: 4.9,
-    reviewCount: 321,
-    instructor: 'David Miller',
-    imageUrl: 'https://images.unsplash.com/photo-1537432376769-00f5c2f4c8d2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80',
-    category: 'Programming',
-    level: 'Advanced',
-    duration: '10 weeks',
-    studentsEnrolled: 14256
+    reviewCount: 3241,
+    price: 89.99,
+    discountPrice: undefined,
+    imageUrl: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?q=80&w=2000&auto=format',
+    duration: '6 weeks',
+    level: 'All Levels',
+    studentsEnrolled: 12450,
+    category: 'Design'
   },
   {
-    id: "6",
-    title: 'Machine Learning Fundamentals',
-    description: 'Introduction to machine learning algorithms and practical applications',
-    price: 79.99,
+    id: '4',
+    title: 'Advanced JavaScript: From Fundamentals to Functional JS',
+    instructor: 'Emily Chen',
     rating: 4.7,
-    reviewCount: 198,
-    instructor: 'Jessica Zhang',
-    imageUrl: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80',
-    category: 'Data Science',
+    reviewCount: 1542,
+    price: 79.99,
+    discountPrice: 39.99,
+    imageUrl: 'https://images.unsplash.com/photo-1579468118864-1b9ea3c0db4a?q=80&w=2070&auto=format',
+    duration: '10 weeks',
     level: 'Advanced',
-    duration: '9 weeks',
-    studentsEnrolled: 10823
+    studentsEnrolled: 7650,
+    category: 'Development'
+  },
+  {
+    id: '5',
+    title: 'Digital Marketing Masterclass: Get Your First 1,000 Customers',
+    instructor: 'Jessica Williams',
+    rating: 4.5,
+    reviewCount: 2100,
+    price: 119.99,
+    discountPrice: 59.99,
+    imageUrl: 'https://images.unsplash.com/photo-1533750349088-cd871a92f312?q=80&w=2070&auto=format',
+    duration: '8 weeks',
+    level: 'Beginner',
+    studentsEnrolled: 18900,
+    category: 'Marketing'
+  },
+  {
+    id: '6',
+    title: 'Financial Management and Analysis: Comprehensive Guide',
+    instructor: 'Robert Taylor',
+    rating: 4.4,
+    reviewCount: 950,
+    price: 149.99,
+    discountPrice: 79.99,
+    imageUrl: 'https://images.unsplash.com/photo-1560472355-536de3962603?q=80&w=2070&auto=format',
+    duration: '14 weeks',
+    level: 'Intermediate',
+    studentsEnrolled: 5200,
+    category: 'Finance'
   }
 ];
 
+const categories = [
+  'All Categories',
+  'Development',
+  'Data Science',
+  'Design',
+  'Marketing',
+  'Finance',
+  'Business'
+];
+
 const Courses = () => {
-  const [cart, setCart] = useState<string[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
+  const [cartItems, setCartItems] = useState<CourseType[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState('All Categories');
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   
   useEffect(() => {
-    // Check if the user is logged in
+    // Check if user is logged in
     const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    const storedUsername = localStorage.getItem('username') || '';
-    
     if (!loggedIn) {
       navigate('/');
       return;
     }
     
-    setIsLoggedIn(loggedIn);
-    setUsername(storedUsername);
+    setIsLoggedIn(true);
+    setUsername(localStorage.getItem('username') || '');
     
-    // Get cart from localStorage if it exists
-    const savedCart = localStorage.getItem('cart');
+    // Get cart items from localStorage
+    const savedCart = localStorage.getItem('cartItems');
     if (savedCart) {
-      setCart(JSON.parse(savedCart));
+      setCartItems(JSON.parse(savedCart));
     }
   }, [navigate]);
-  
-  const handleAddToCart = (course: CourseType) => {
-    if (cart.includes(course.id)) {
-      toast({
-        title: "Already in cart",
-        description: "This course is already in your cart",
-      });
-      return;
-    }
-    
-    const newCart = [...cart, course.id];
-    setCart(newCart);
-    localStorage.setItem('cart', JSON.stringify(newCart));
-    
-    toast({
-      title: "Added to cart",
-      description: "Course has been added to your cart",
-    });
-  };
   
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('username');
-    localStorage.removeItem('isGoogleUser');
+    setIsLoggedIn(false);
     navigate('/');
   };
   
+  const handleAddToCart = (course: CourseType) => {
+    const isInCart = cartItems.some(item => item.id === course.id);
+    
+    if (isInCart) {
+      toast({
+        title: "Already in cart",
+        description: `${course.title} is already in your cart.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const newCartItems = [...cartItems, course];
+    setCartItems(newCartItems);
+    localStorage.setItem('cartItems', JSON.stringify(newCartItems));
+    
+    toast({
+      title: "Added to cart",
+      description: `${course.title} has been added to your cart.`,
+    });
+  };
+  
+  const filteredCourses = sampleCourses.filter(course => {
+    const matchesCategory = selectedCategory === 'All Categories' || course.category === selectedCategory;
+    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          course.instructor.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          course.category.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return matchesCategory && matchesSearch;
+  });
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <Navbar 
         isLoggedIn={isLoggedIn} 
-        username={username} 
-        cartItemCount={cart.length} 
+        cartItemCount={cartItems.length} 
+        username={username}
         onLogout={handleLogout}
       />
       
-      <main className="container mx-auto py-8 px-4">
-        <section className="mb-12">
-          <div className="glass-card p-8 rounded-xl">
-            <h1 className="text-3xl font-bold mb-2">Welcome, {username}!</h1>
-            <p className="text-gray-600">Discover our course catalog and start learning today.</p>
+      <main className="container mx-auto px-4 py-8">
+        <section className="mb-10">
+          <h1 className="text-3xl font-bold mb-2">Explore Courses</h1>
+          <p className="text-gray-600">Discover top-rated courses to enhance your skills</p>
+        </section>
+        
+        <section className="glass-card p-4 mb-8">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-grow relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+              <Input
+                type="text"
+                placeholder="Search for courses..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="glass-input pl-10 w-full"
+              />
+            </div>
+            
+            <div className="relative inline-block">
+              <div className="flex items-center gap-2 glass-input cursor-pointer min-w-[180px]">
+                <Filter className="h-4 w-4 text-gray-600" />
+                <span>{selectedCategory}</span>
+                <ChevronDown className="h-4 w-4 ml-auto text-gray-600" />
+              </div>
+              <div className="absolute top-full left-0 right-0 mt-1 p-2 glass-card z-10 hidden group-hover:block">
+                {categories.map((category) => (
+                  <div 
+                    key={category} 
+                    className="p-2 hover:bg-white/50 rounded cursor-pointer"
+                    onClick={() => setSelectedCategory(category)}
+                  >
+                    {category}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
         
-        <section>
-          <h2 className="text-2xl font-bold mb-6">Featured Courses</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {coursesData.map((course) => (
-              <CourseCard 
-                key={course.id}
-                course={course}
-                onAddToCart={() => handleAddToCart(course)}
-              />
-            ))}
-          </div>
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredCourses.map((course) => (
+            <CourseCard 
+              key={course.id} 
+              course={course} 
+              onAddToCart={handleAddToCart} 
+            />
+          ))}
         </section>
       </main>
     </div>
