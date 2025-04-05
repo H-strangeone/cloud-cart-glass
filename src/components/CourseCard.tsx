@@ -16,6 +16,7 @@ export interface CourseType {
   level: string;
   studentsEnrolled: number;
   category: string;
+  description: string; // Added the missing description property
 }
 
 interface CourseCardProps {
