@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
+import { verifyCredentials } from '@/utils/auth';
+
 
 const Index = () => {
   const [username, setUsername] = useState('');
@@ -11,12 +13,20 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    if (isLoggedIn === 'true') {
+      navigate('/courses');
+    }
+  }, [navigate]);
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     
-    // Simulate login
-    setTimeout(() => {
+    // Verify against predefined users
+    if (verifyCredentials(username, password)) {
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('username', username);
       setIsLoading(false);
@@ -25,7 +35,15 @@ const Index = () => {
         description: `Welcome back, ${username}!`,
       });
       navigate('/courses');
-    }, 1500);
+    } else {
+      setIsLoading(false);
+      setError('Invalid username or password. Please try again.');
+      toast({
+        title: "Login failed",
+        description: "Invalid username or password",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleGoogleLogin = () => {
