@@ -1,22 +1,33 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
+import { verifyCredentials } from '@/utils/auth';
 
 const Index = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    if (isLoggedIn === 'true') {
+      navigate('/courses');
+    }
+  }, [navigate]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     
-    // Simulate login
-    setTimeout(() => {
+    // Verify against predefined users
+    if (verifyCredentials(username, password)) {
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('username', username);
       setIsLoading(false);
@@ -25,22 +36,36 @@ const Index = () => {
         description: `Welcome back, ${username}!`,
       });
       navigate('/courses');
-    }, 1500);
+    } else {
+      setIsLoading(false);
+      setError('Invalid username or password. Please try again.');
+      toast({
+        title: "Login failed",
+        description: "Invalid username or password",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleGoogleLogin = () => {
     setIsLoading(true);
     
-    // Simulate Google login
+    // Simulate Google login authentication process
+    // In a real implementation, you would use Google OAuth here
     setTimeout(() => {
-      const randomNames = ['Alex', 'Jordan', 'Taylor', 'Sam', 'Casey'];
-      const randomName = randomNames[Math.floor(Math.random() * randomNames.length)];
+      const googleUser = {
+        name: 'Google User',
+        email: 'user@gmail.com'
+      };
+      
       localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('username', randomName);
+      localStorage.setItem('username', googleUser.name);
+      localStorage.setItem('isGoogleUser', 'true');
+      
       setIsLoading(false);
       toast({
         title: "Google login successful",
-        description: `Welcome, ${randomName}!`,
+        description: `Welcome, ${googleUser.name}!`,
       });
       navigate('/courses');
     }, 1500);
@@ -63,6 +88,12 @@ const Index = () => {
         
         <div className="glass-card p-8 animate-slide-up">
           <h2 className="text-2xl font-bold mb-6 text-center">Log in to your account</h2>
+          
+          {error && (
+            <div className="mb-4 p-3 bg-red-100/70 text-red-800 rounded-md text-sm">
+              {error}
+            </div>
+          )}
           
           <form onSubmit={handleLogin} className="space-y-4 mb-6">
             <div>
@@ -142,6 +173,12 @@ const Index = () => {
               Sign up
             </a>
           </div>
+        </div>
+        
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-500">
+            Test users: saurabh/1234, rohit/1234, chirag/1234
+          </p>
         </div>
       </div>
     </div>
